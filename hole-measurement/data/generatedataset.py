@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import random
 
 # structure
 # [datawidth] columns of height data -100 for null
@@ -54,6 +55,14 @@ def trimRightEdge(dataset):
         row[-1] = nullValue
     return dataset
 
+def addNoise(dataset):
+    for row in dataset:
+        for val in row:
+            if val != nullValue:
+                val += random.random() - 0.5 
+
+    return dataset
+
 def holeData(row):
     """Finds hole data from an input row.
     
@@ -85,7 +94,6 @@ def holeData(row):
 
         lastValue = value
 
-
     # no hole found
     return False, 0, 0, 0
 
@@ -102,11 +110,24 @@ def buildLables(unlabled):
         i = i+1
     return lables
 
+def buildNulls(unlabled):
+    nRows = np.shape(unlabled)[0]
+    lables = np.zeros((nRows,4))
+    i = 0
+    for row in unlabled:
+        h = holeData(row)
+        lables[i][0] = h[0]
+        lables[i][1] = h[1]
+        lables[i][2] = h[2]
+        lables[i][3] = h[3]
+        i = i+1
+    return lables
 
 ds = generateSlopes()
 ds = np.concatenate((ds, knockOutHoles(ds.copy())))
 ds = np.concatenate((ds, trimLeftEdge(ds.copy())))
 ds = np.concatenate((ds, trimRightEdge(ds.copy())))
+ds = np.concatenate((ds, addNoise(ds.copy())))
 
 np.shape(ds)
 
